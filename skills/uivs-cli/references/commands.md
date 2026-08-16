@@ -1,5 +1,27 @@
 # uivs CLI Reference
 
+## Install
+
+Package: `@cissibot/uivs`
+
+```bash
+pip install -r requirements.txt
+npm link
+# or
+npm install -g .
+# or
+npm install -g @cissibot/uivs
+```
+
+`npm link` exposes the `uivs` command. When the command is not linked, use `node bin/uivs.js`.
+
+## Repository commands
+
+- `npm run verify` runs the skill smoke script.
+- `bash skills/uivs-cli/scripts/verify-project.sh` runs the same checks directly.
+- `.github/workflows/publish.yml` publishes on `v*` tags with npm trusted publishing.
+- There is no production build step; the workflow only runs `npm run build --if-present` as a no-op.
+
 ## Commands
 
 | Command | Purpose |
@@ -35,7 +57,7 @@ Fetched post fields:
   "username": "NorthFishHasNa",
   "slug": "soft-turtle-49",
   "url": "https://uiverse.io/NorthFishHasNa/soft-turtle-49",
-  "postId": 1234,
+  "postId": "aa4a45a2-a962-4bdc-a4c9-a681aea46ee8",
   "type": "button",
   "isTailwind": false,
   "title": "",
@@ -60,7 +82,7 @@ Search output:
       "username": "...",
       "slug": "...",
       "url": "https://uiverse.io/...",
-      "postId": 1234,
+      "postId": "aa4a45a2-a962-4bdc-a4c9-a681aea46ee8",
       "type": "button",
       "theme": "...",
       "isTailwind": false
@@ -80,6 +102,7 @@ Search output:
 | `lib/convert.js` | `resolveTarget` and `generateCode` |
 | `scripts/fetch-post.py` | Fetch one post via `curl_cffi` |
 | `scripts/search-posts.py` | Search and paginate via `curl_cffi` |
+| `.github/workflows/publish.yml` | Tag-driven npm publish via GitHub Actions |
 
 ## Data routes
 
@@ -114,5 +137,6 @@ Pass `--proxy <proxy-url>` or set `UIVERSE_PROXY` with a proxy that works in you
 - Require non-empty `code` and a supported `language` for conversion.
 - `HTTP 200` alone does not prove success.
 - Keep the no-browser invariant when extending the tool.
+- Keep React conversion on `parse5`; do not reintroduce `htmltojsx`.
 
 Run `skills/uivs-cli/scripts/verify-project.sh` for syntax and CLI smoke checks.

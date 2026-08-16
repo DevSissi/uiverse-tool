@@ -1,25 +1,31 @@
 ---
 name: uivs-cli
-description: "Fetch, search, convert, and verify Uiverse component code with the pure-HTTP uivs-cli in this repository. Use when working in uiverse-tool: pulling HTML/CSS/React/Vue/Svelte/Lit components from uiverse.io, converting a component into app code, searching by tag or creator, fixing CLI code generation, troubleshooting proxy or fetch failures, or verifying the CLI without launching a browser."
+description: "Fetch, search, convert, and verify Uiverse component code with the pure-HTTP uivs command in this repository. Use when working in uiverse-tool: pulling HTML/CSS/React/Vue/Svelte/Lit components from uiverse.io, converting a component into app code, searching by tag or creator, fixing CLI code generation, troubleshooting proxy or fetch failures, or verifying the CLI without launching a browser."
 ---
 
 # uivs CLI
 
 ## Overview
 
-Fetch and convert Uiverse components with `node bin/uivs.js` or the installed `uivs` command. This project is a pure HTTP CLI: Node orchestrates output and conversion, while Python scripts fetch and search through `curl_cffi`. Do not reach for Playwright or a browser.
+Fetch and convert Uiverse components with the installed `uivs` command after `npm link` or a global install. Use `node bin/uivs.js` when running directly from an unlinked checkout. This project is a pure HTTP CLI: Node orchestrates output and conversion, while Python scripts fetch and search through `curl_cffi`. Do not reach for Playwright or a browser.
 
 ## Quick start
 
-Run from the repo root:
+Prerequisites: Node.js 18+, Python 3.10+, and `pip install -r requirements.txt`.
+
+Link the local CLI once, then run from the repo root:
 
 ```bash
-node bin/uivs.js react NorthFishHasNa/soft-turtle-49
-node bin/uivs.js vue https://uiverse.io/NorthFishHasNa/soft-turtle-49 /tmp/button.vue
-node bin/uivs.js search rounded --limit 5
+npm link
+
+uivs react NorthFishHasNa/soft-turtle-49
+uivs vue https://uiverse.io/NorthFishHasNa/soft-turtle-49 /tmp/button.vue
+uivs search rounded --limit 5
 ```
 
 Supported languages: `html`, `css`, `react` (`jsx`/`tsx`), `vue`, `svelte`, `lit`.
+
+If `uivs` is not linked, replace it with `node bin/uivs.js`.
 
 If a fetch fails due to network blocking, retry with `--proxy <proxy-url>`, or set `UIVERSE_PROXY`, `HTTPS_PROXY`, or `HTTP_PROXY`.
 
@@ -29,7 +35,7 @@ If a fetch fails due to network blocking, retry with `--proxy <proxy-url>`, or s
 2. Fetch with a language target.
 3. Inspect the JSON for `postId`, `code`, `language`, `type`, and `tags`.
 4. Save with an output file or reuse the printed code.
-5. Run `skills/uivs-cli/scripts/verify-project.sh` after code changes.
+5. Run `bash skills/uivs-cli/scripts/verify-project.sh` or `npm run verify` after code changes.
 
 URL input only accepts `uiverse.io` and `www.uiverse.io`. Bare input must be `author/slug`.
 
@@ -43,13 +49,19 @@ URL input only accepts `uiverse.io` and `www.uiverse.io`. Bare input must be `au
 
 Preserve the generated-code contract when editing `lib/convert.js`: `target`, `language`, `code`, plus the metadata added by `bin/uivs.js`.
 
+Keep the converter on `parse5`; do not reintroduce `htmltojsx`.
+
 ## Verification
 
 Run the local smoke script after edits:
 
 ```bash
 bash skills/uivs-cli/scripts/verify-project.sh
+# or
+npm run verify
 ```
+
+The script checks Node and Python syntax, CLI help and version output, language target resolution, and the `parse5` HTML-to-JSX conversion.
 
 For live commands, require real parsed output: JSON with a `postId`, non-empty `code`, and a supported `language`. A `200` status alone is not proof of success.
 
