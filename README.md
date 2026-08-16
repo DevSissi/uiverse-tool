@@ -26,6 +26,18 @@ No Playwright, no browser, no Chromium download.
 - HTML to React/JSX conversion via `parse5`
 - Proxy support for restricted networks
 
+## Agent Skill
+
+This repository ships a companion agent skill at `skills/uivs-cli/SKILL.md`. It guides coding agents through fetching, searching, converting, and verifying Uiverse components with `uivs`.
+
+Install it globally for agents that support `skills`:
+
+```bash
+npx skills add DevSissi/uiverse-tool --skill uivs-cli -g -y
+```
+
+The CLI is fully usable without the skill.
+
 ## Install
 
 Requires Node.js 18+ and Python 3.10+.

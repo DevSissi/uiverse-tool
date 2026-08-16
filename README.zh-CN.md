@@ -26,6 +26,18 @@
 - 使用 `parse5` 将 HTML 转换为 React/JSX
 - 支持代理，适配受限网络
 
+## Agent 技能
+
+仓库内置配套的 Agent 技能 `skills/uivs-cli/SKILL.md`，用于指导编码代理使用 `uivs` 获取、搜索、转换并验证 Uiverse 组件。
+
+为支持 `skills` 的代理全局安装：
+
+```bash
+npx skills add DevSissi/uiverse-tool --skill uivs-cli -g -y
+```
+
+CLI 本身不依赖该技能，可独立使用。
+
 ## 安装
 
 需要 Node.js 18+ 与 Python 3.10+。
