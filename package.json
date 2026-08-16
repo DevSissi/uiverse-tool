@@ -1,0 +1,25 @@
+{
+  "name": "uivs",
+  "version": "0.1.0",
+  "description": "Fetch Uiverse component code with a pure HTTP client",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
+  },
+  "type": "module",
+  "bin": {
+    "uivs": "bin/uivs.js"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "scripts",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "htmltojsx": "^0.3.0"
+  }
+}
