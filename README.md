@@ -40,17 +40,10 @@ Install from the repository:
 npm install -g .
 ```
 
-Install as a global CLI:
+After publishing to npm:
 
 ```bash
 npm install -g @cissibot/uivs
-```
-
-Or use it inside a project:
-
-```bash
-npm install @cissibot/uivs
-npx uivs --help
 ```
 
 ## Usage

@@ -40,17 +40,10 @@ pip install curl_cffi
 npm install -g .
 ```
 
-全局安装为 CLI：
+发布到 npm 后：
 
 ```bash
 npm install -g @cissibot/uivs
-```
-
-或在项目内使用：
-
-```bash
-npm install @cissibot/uivs
-npx uivs --help
 ```
 
 ## 用法
