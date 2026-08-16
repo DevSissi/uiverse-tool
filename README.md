@@ -6,8 +6,8 @@
 
 **English** | [简体中文](./README.zh-CN.md)
 
-[![npm version](https://img.shields.io/npm/v/uivs?style=flat-square&logo=npm&logoColor=white&color=cb3837)](https://www.npmjs.com/package/uivs)
-[![npm downloads](https://img.shields.io/npm/dm/uivs?style=flat-square&logo=npm&logoColor=white&color=cb3837)](https://www.npmjs.com/package/uivs)
+[![npm version](https://img.shields.io/npm/v/@cissibot%2Fuivs?style=flat-square&logo=npm&logoColor=white&color=cb3837)](https://www.npmjs.com/package/@cissibot/uivs)
+[![npm downloads](https://img.shields.io/npm/dm/@cissibot%2Fuivs?style=flat-square&logo=npm&logoColor=white&color=cb3837)](https://www.npmjs.com/package/@cissibot/uivs)
 [![Node.js](https://img.shields.io/badge/node.js-%3E%3D18-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org)
 [![Python](https://img.shields.io/badge/python-%3E%3D3.10-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square&logo=opensourceinitiative&logoColor=white)](https://opensource.org/license/mit)
@@ -42,7 +42,7 @@ npm install -g .
 After publishing to npm:
 
 ```bash
-npm install -g uivs
+npm install -g @cissibot/uivs
 ```
 
 ## Usage

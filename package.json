@@ -1,5 +1,5 @@
 {
-  "name": "uivs",
+  "name": "@cissibot/uivs",
   "version": "0.1.0",
   "description": "Fetch Uiverse component code with a pure HTTP client",
   "license": "MIT",
@@ -11,7 +11,8 @@
     "verify": "bash skills/uivs-cli/scripts/verify-project.sh"
   },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org"
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
   },
   "type": "module",
   "bin": {
