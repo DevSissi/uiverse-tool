@@ -30,4 +30,32 @@ fi
 echo "target resolution"
 node --input-type=module -e "import { resolveTarget } from './lib/convert.js'; console.log(resolveTarget('jsx'));" | grep -qx react
 
+echo "html to jsx conversion"
+node --input-type=module - <<'JS'
+import { generateCode } from './lib/convert.js';
+
+const html = '<button class="btn" disabled aria-label="Save"><svg viewBox="0 0 24 24" stroke-width="2" fill="none"><path d="M0 0h24v24H0z" /></svg><span style="color: red; margin: 0 auto">Save &amp; exit</span></button>';
+const { code } = generateCode('react', {
+  type: 'button',
+  html,
+  css: '',
+  isTailwind: true,
+});
+
+const expected = [
+  'className="btn"',
+  'disabled',
+  'strokeWidth="2"',
+  "style={{ color: 'red', margin: '0 auto' }}",
+  'Save &amp; exit',
+];
+
+for (const part of expected) {
+  if (!code.includes(part)) {
+    console.error(`missing expected jsx fragment: ${part}`);
+    process.exit(1);
+  }
+}
+JS
+
 echo "ok"

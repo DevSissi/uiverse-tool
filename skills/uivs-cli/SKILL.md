@@ -36,7 +36,7 @@ URL input only accepts `uiverse.io` and `www.uiverse.io`. Bare input must be `au
 ## Conversion behavior
 
 - `html` and `css` return source code as stored.
-- `react` / `jsx` / `tsx` converts HTML with `htmltojsx`; non-Tailwind components wrap CSS in a styled-components `StyledWrapper`; Tailwind components use plain JSX.
+- `react` / `jsx` / `tsx` parses HTML with `parse5` and emits JSX; non-Tailwind components wrap CSS in a styled-components `StyledWrapper`; Tailwind components use plain JSX.
 - `vue` emits an SFC with scoped CSS unless the component is Tailwind.
 - `svelte` emits markup plus a `<style>` block unless Tailwind.
 - `lit` emits a `LitElement` with CSS or no styles for Tailwind.
