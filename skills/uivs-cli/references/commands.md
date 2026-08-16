@@ -122,7 +122,7 @@ Precedence:
 3. `HTTPS_PROXY` / `https_proxy`
 4. `HTTP_PROXY` / `http_proxy`
 
-Pass `--proxy <proxy-url>` or set `UIVERSE_PROXY` with a proxy that works in your environment.
+For restricted networks, pass `--proxy` or set `UIVERSE_PROXY` with a proxy URL that works in your environment.
 
 ## Development and publishing
 
