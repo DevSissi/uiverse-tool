@@ -5,7 +5,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/DevSissi/uiverse-tool.git"
+    "url": "git+https://github.com/DevSissi/uiverse-tool.git"
   },
   "scripts": {
     "verify": "bash skills/uivs-cli/scripts/verify-project.sh"
