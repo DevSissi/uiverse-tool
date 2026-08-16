@@ -3,6 +3,13 @@
   "version": "0.1.0",
   "description": "Fetch Uiverse component code with a pure HTTP client",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DevSissi/uiverse-tool.git"
+  },
+  "scripts": {
+    "verify": "bash skills/uivs-cli/scripts/verify-project.sh"
+  },
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
   },
