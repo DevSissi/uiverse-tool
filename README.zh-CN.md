@@ -23,6 +23,7 @@
 - 支持按 tag、样式、作者名搜索
 - JSON 输出包含分类和标签
 - 通过 Python `curl_cffi` 发起纯 HTTP 请求
+- 使用 `parse5` 将 HTML 转换为 React/JSX
 - 支持代理，适配受限网络
 
 ## 安装

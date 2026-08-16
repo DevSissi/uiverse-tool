@@ -23,6 +23,7 @@ No Playwright, no browser, no Chromium download.
 - Search by tag, style, or creator name
 - JSON output with category and tags
 - Pure HTTP requests through Python `curl_cffi`
+- HTML to React/JSX conversion via `parse5`
 - Proxy support for restricted networks
 
 ## Install
