@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 
+import { createRequire } from 'node:module';
 import { writeFile } from 'node:fs/promises';
 import { fetchPost, searchPosts } from '../lib/fetch.js';
 import { generateCode, resolveTarget } from '../lib/convert.js';
+
+const require = createRequire(import.meta.url);
+const { version } = require('../package.json');
 
 function parseArgs(argv) {
   let proxy = '';
@@ -55,7 +59,7 @@ async function run() {
   }
 
   if (command === '--version' || command === '-v') {
-    console.log('uivs 0.1.0');
+    console.log(`uivs ${version}`);
     return;
   }
 
