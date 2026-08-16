@@ -1,0 +1,4 @@
+interface:
+  display_name: "uivs CLI"
+  short_description: "Fetch, search, convert, and verify Uiverse components"
+  default_prompt: "Use $uivs-cli to fetch, search, or convert a Uiverse component."
