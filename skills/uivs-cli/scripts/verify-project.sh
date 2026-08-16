@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_DIR="${1:-$(pwd)}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="${1:-$(cd "$SCRIPT_DIR/../../.." && pwd)}"
 cd -- "$REPO_DIR"
 
 echo "node syntax"

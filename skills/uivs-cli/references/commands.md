@@ -15,13 +15,6 @@ npm install -g @cissibot/uivs
 
 `npm link` exposes the `uivs` command. When the command is not linked, use `node bin/uivs.js`.
 
-## Repository commands
-
-- `npm run verify` runs the skill smoke script.
-- `bash skills/uivs-cli/scripts/verify-project.sh` runs the same checks directly.
-- `.github/workflows/publish.yml` publishes on `v*` tags with npm trusted publishing.
-- There is no production build step; the workflow only runs `npm run build --if-present` as a no-op.
-
 ## Commands
 
 | Command | Purpose |
@@ -131,6 +124,13 @@ Precedence:
 
 Pass `--proxy <proxy-url>` or set `UIVERSE_PROXY` with a proxy that works in your environment.
 
+## Development and publishing
+
+- `npm run verify` runs the skill smoke script.
+- `bash skills/uivs-cli/scripts/verify-project.sh` runs the same checks directly.
+- There is no production build step; the workflow only runs `npm run build --if-present` as a no-op.
+- `.github/workflows/publish.yml` publishes on `v*` tags with npm trusted publishing.
+
 ## Verification rules
 
 - Require parsed JSON with `postId` for fetch commands.
@@ -139,4 +139,4 @@ Pass `--proxy <proxy-url>` or set `UIVERSE_PROXY` with a proxy that works in you
 - Keep the no-browser invariant when extending the tool.
 - Keep React conversion on `parse5`; do not reintroduce `htmltojsx`.
 
-Run `skills/uivs-cli/scripts/verify-project.sh` for syntax and CLI smoke checks.
+Run `npm run verify` or `bash skills/uivs-cli/scripts/verify-project.sh` for syntax and CLI smoke checks.
