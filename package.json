@@ -1,6 +1,6 @@
 {
   "name": "@cissibot/uivs",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Fetch Uiverse component code with a pure HTTP client",
   "license": "MIT",
   "repository": {
