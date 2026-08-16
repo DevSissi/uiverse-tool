@@ -34,16 +34,16 @@
 pip install curl_cffi
 ```
 
-从仓库安装：
-
-```bash
-npm install -g .
-```
-
-发布到 npm 后：
+安装已发布的 npm 包为全局 CLI：
 
 ```bash
 npm install -g @cissibot/uivs
+```
+
+或从仓库安装：
+
+```bash
+npm install -g .
 ```
 
 ## 用法

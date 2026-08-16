@@ -34,16 +34,16 @@ Requires Node.js 18+ and Python 3.10+.
 pip install curl_cffi
 ```
 
-Install from the repository:
-
-```bash
-npm install -g .
-```
-
-After publishing to npm:
+Install the published package as a global CLI:
 
 ```bash
 npm install -g @cissibot/uivs
+```
+
+Or install from the repository:
+
+```bash
+npm install -g .
 ```
 
 ## Usage
