@@ -89,53 +89,14 @@ function writeOut(text) {
 
 const toJson = (value) => JSON.stringify(value, null, 2);
 
-async function run() {
-  const { proxy, limit, positional } = parseArgs(process.argv.slice(2));
-  const command = positional[0] || '';
-
-  if (command === '--help' || command === '-h') {
-    usage();
-    return;
-  }
-
-  if (command === '--version' || command === '-v') {
-    console.log(`uivs ${version}`);
-    return;
-  }
-
-  const input = positional[1];
-  if (!input) {
-    usage();
-    process.exitCode = 1;
-    return;
-  }
-
-  if (command === 'search') {
-    const results = await searchPosts(input, { proxy, limit });
-    await writeOut(toJson(results));
-    return;
-  }
-
+async function convert(command, input, output, proxy) {
   // Reject an unknown language before spending a network request on it.
-  const target = command === 'info' || command === 'tags' ? null : resolveTarget(command);
+  const target = resolveTarget(command);
   const post = await fetchPost(input, { proxy });
-
-  if (command === 'info') {
-    const { html, css, ...metadata } = post;
-    await writeOut(toJson(metadata));
-    return;
-  }
-
-  if (command === 'tags') {
-    await writeOut(toJson(post.tags));
-    return;
-  }
-
-  const output = positional[2];
-  const generated = generateCode(target, post);
-  const result = {
-    target: generated.target,
-    language: generated.language,
+  const { language, code } = generateCode(target, post);
+  const summary = {
+    target,
+    language,
     username: post.username,
     slug: post.slug,
     url: post.url,
@@ -143,18 +104,56 @@ async function run() {
     tags: post.tags,
     isTailwind: post.isTailwind,
     postId: post.postId,
-    length: generated.code.length,
-    code: generated.code,
+    length: code.length,
   };
 
-  if (output) {
-    await writeFile(output, generated.code, 'utf8');
-    const { code: _code, ...summary } = result;
-    await writeOut(toJson(summary));
-    console.error(`saved ${generated.language} code to ${output}`);
-  } else {
-    await writeOut(toJson(result));
+  if (!output) {
+    await writeOut(toJson({ ...summary, code }));
+    return;
   }
+  await writeFile(output, code, 'utf8');
+  await writeOut(toJson(summary));
+  console.error(`saved ${language} code to ${output}`);
+}
+
+async function run() {
+  const { proxy, limit, positional } = parseArgs(process.argv.slice(2));
+  const [command = '', input, output] = positional;
+
+  if (command === '--help' || command === '-h') {
+    usage();
+    return;
+  }
+
+  if (command === '--version' || command === '-v') {
+    await writeOut(`uivs ${version}`);
+    return;
+  }
+
+  if (!input) {
+    usage();
+    process.exitCode = 1;
+    return;
+  }
+
+  if (command === 'search') {
+    await writeOut(toJson(await searchPosts(input, { proxy, limit })));
+    return;
+  }
+
+  if (command === 'info') {
+    const { html, css, ...metadata } = await fetchPost(input, { proxy });
+    await writeOut(toJson(metadata));
+    return;
+  }
+
+  if (command === 'tags') {
+    const post = await fetchPost(input, { proxy });
+    await writeOut(toJson(post.tags));
+    return;
+  }
+
+  await convert(command, input, output, proxy);
 }
 
 run().catch((error) => {
