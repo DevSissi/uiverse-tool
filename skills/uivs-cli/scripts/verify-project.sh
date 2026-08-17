@@ -58,6 +58,10 @@ for (const part of [
   check(`jsx fragment: ${part}`, attrs.includes(part));
 }
 
+// parse5 reports a namespaced attribute as name + prefix; the prefix must
+// survive so `xlink:href` becomes `xlinkHref` rather than a bare `href`.
+check('namespaced attribute', react({ type: 'icon', html: '<svg><use xlink:href="#a"/></svg>' }).includes('xlinkHref="#a"'));
+
 // Sibling roots need a fragment, a single root must not gain one.
 const multiRoot = react({
   type: 'checkbox',
@@ -138,6 +142,8 @@ done
 expect_error 'Unsupported language' bogus author/slug
 expect_error 'Unknown option' react author/slug --nope
 expect_error 'Missing value for --proxy' react author/slug --proxy
+expect_error 'Missing value for --proxy' react author/slug --proxy --limit 5
+expect_error 'Missing value for --limit' search x --limit
 
 echo "piped stdout stays intact"
 # console.log on a pipe is asynchronous: exiting mid-write silently truncates
