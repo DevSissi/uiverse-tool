@@ -3,31 +3,58 @@
 import { createRequire } from 'node:module';
 import { writeFile } from 'node:fs/promises';
 import { fetchPost, searchPosts } from '../lib/fetch.js';
-import { generateCode, resolveTarget } from '../lib/convert.js';
+import { generateCode, resolveTarget, SUPPORTED_TARGETS } from '../lib/convert.js';
 
 const require = createRequire(import.meta.url);
 const { version } = require('../package.json');
 
+const DEFAULT_LIMIT = 10;
+const MAX_LIMIT = 100;
+
+function parseLimit(raw) {
+  const value = Number(raw);
+  if (!Number.isInteger(value) || value < 1 || value > MAX_LIMIT) {
+    throw new Error(`--limit must be an integer between 1 and ${MAX_LIMIT}, received: ${raw}`);
+  }
+  return value;
+}
+
 function parseArgs(argv) {
   let proxy = '';
-  let limit = 10;
+  let limit = DEFAULT_LIMIT;
   const positional = [];
+
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
-    if (arg === '--proxy') {
-      proxy = argv[i + 1] || '';
+    const [flag, inlineValue] = arg.startsWith('--') && arg.includes('=')
+      ? [arg.slice(0, arg.indexOf('=')), arg.slice(arg.indexOf('=') + 1)]
+      : [arg, undefined];
+
+    const takeValue = () => {
+      if (inlineValue !== undefined) {
+        return inlineValue;
+      }
       i += 1;
-    } else if (arg.startsWith('--proxy=')) {
-      proxy = arg.slice('--proxy='.length);
-    } else if (arg === '--limit') {
-      limit = Number(argv[i + 1]) || 10;
-      i += 1;
-    } else if (arg.startsWith('--limit=')) {
-      limit = Number(arg.slice('--limit='.length)) || 10;
+      if (i >= argv.length) {
+        throw new Error(`Missing value for ${flag}`);
+      }
+      return argv[i];
+    };
+
+    if (flag === '--proxy') {
+      proxy = takeValue().trim();
+      if (!proxy) {
+        throw new Error('Missing value for --proxy');
+      }
+    } else if (flag === '--limit') {
+      limit = parseLimit(takeValue());
+    } else if (arg.startsWith('--') && arg !== '--help' && arg !== '--version') {
+      throw new Error(`Unknown option: ${arg}`);
     } else {
       positional.push(arg);
     }
   }
+
   return { proxy, limit, positional };
 }
 
@@ -41,13 +68,23 @@ function usage() {
   uivs --version
 
 languages:
-  html  css  react (jsx|tsx)  vue  svelte  lit
+  ${SUPPORTED_TARGETS.join('  ')}   (jsx|tsx alias react)
 
 options:
   --proxy <url>       HTTP/HTTPS proxy (or UIVERSE_PROXY / HTTPS_PROXY)
-  --limit <n>         max search results (default 10)
+  --limit <n>         max search results, 1-${MAX_LIMIT} (default ${DEFAULT_LIMIT})
 `);
 }
+
+// console.log on a pipe is asynchronous. Awaiting the drain keeps large
+// payloads intact, because the process must not exit mid-write.
+function writeOut(text) {
+  return new Promise((resolve, reject) => {
+    process.stdout.write(`${text}\n`, (error) => (error ? reject(error) : resolve()));
+  });
+}
+
+const toJson = (value) => JSON.stringify(value, null, 2);
 
 async function run() {
   const { proxy, limit, positional } = parseArgs(process.argv.slice(2));
@@ -66,29 +103,31 @@ async function run() {
   const input = positional[1];
   if (!input) {
     usage();
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   if (command === 'search') {
     const results = await searchPosts(input, { proxy, limit });
-    console.log(JSON.stringify(results, null, 2));
+    await writeOut(toJson(results));
     return;
   }
 
+  // Reject an unknown language before spending a network request on it.
+  const target = command === 'info' || command === 'tags' ? null : resolveTarget(command);
   const post = await fetchPost(input, { proxy });
 
   if (command === 'info') {
     const { html, css, ...metadata } = post;
-    console.log(JSON.stringify(metadata, null, 2));
+    await writeOut(toJson(metadata));
     return;
   }
 
   if (command === 'tags') {
-    console.log(JSON.stringify(post.tags, null, 2));
+    await writeOut(toJson(post.tags));
     return;
   }
 
-  const target = resolveTarget(command);
   const output = positional[2];
   const generated = generateCode(target, post);
   const result = {
@@ -108,16 +147,14 @@ async function run() {
   if (output) {
     await writeFile(output, generated.code, 'utf8');
     const { code: _code, ...summary } = result;
-    console.log(JSON.stringify(summary, null, 2));
+    await writeOut(toJson(summary));
     console.error(`saved ${generated.language} code to ${output}`);
   } else {
-    console.log(JSON.stringify(result, null, 2));
+    await writeOut(toJson(result));
   }
 }
 
-run()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error.message || String(error));
-    process.exit(1);
-  });
+run().catch((error) => {
+  console.error(error.message || String(error));
+  process.exitCode = 1;
+});
