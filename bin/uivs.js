@@ -35,7 +35,10 @@ function parseArgs(argv) {
         return inlineValue;
       }
       i += 1;
-      if (i >= argv.length) {
+      // The next token must be the value, not another flag, so
+      // `--proxy --limit 5` reports the missing value instead of
+      // silently treating `--limit` as a proxy URL.
+      if (i >= argv.length || argv[i].startsWith('--')) {
         throw new Error(`Missing value for ${flag}`);
       }
       return argv[i];
