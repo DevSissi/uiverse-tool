@@ -79,11 +79,29 @@ options:
 `);
 }
 
+// A reader that closes early (`uivs ... | head`) makes stdout emit EPIPE.
+// Nothing else handles that event, so without this listener Node would
+// report it as an unhandled error and print a stack trace.
+process.stdout.on('error', (error) => {
+  if (error.code === 'EPIPE') {
+    process.exit(0);
+  }
+  throw error;
+});
+
 // console.log on a pipe is asynchronous. Awaiting the drain keeps large
 // payloads intact, because the process must not exit mid-write.
 function writeOut(text) {
   return new Promise((resolve, reject) => {
-    process.stdout.write(`${text}\n`, (error) => (error ? reject(error) : resolve()));
+    process.stdout.write(`${text}\n`, (error) => {
+      // EPIPE is handled by the listener above; resolving avoids a duplicate
+      // rejection racing the exit.
+      if (error && error.code !== 'EPIPE') {
+        reject(error);
+        return;
+      }
+      resolve();
+    });
   });
 }
 

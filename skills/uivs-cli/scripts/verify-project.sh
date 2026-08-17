@@ -174,6 +174,15 @@ STUB
 chmod +x "$STUB_DIR/python3"
 PATH="$STUB_DIR:$PATH" node bin/uivs.js react a/b > "$STUB_DIR/out.json"
 PATH="$STUB_DIR:$PATH" node bin/uivs.js react a/b | cat > "$STUB_DIR/piped.json"
+
+# A reader that closes early must exit quietly, not crash with EPIPE.
+PATH="$STUB_DIR:$PATH" node bin/uivs.js react a/b 2> "$STUB_DIR/epipe.err" | head -c 32 > /dev/null
+if [[ -s "$STUB_DIR/epipe.err" ]]; then
+    echo "closing the reader early produced errors:" >&2
+    head -n 3 "$STUB_DIR/epipe.err" >&2
+    exit 1
+fi
+
 node -e "
 const fs = require('node:fs');
 const direct = fs.readFileSync(process.argv[1], 'utf8');
