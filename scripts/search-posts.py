@@ -5,11 +5,20 @@ import json
 import sys
 from urllib.parse import urlencode
 
-from curl_cffi import requests as cffi_requests
+try:
+    from curl_cffi import requests as cffi_requests
+except ModuleNotFoundError:
+    raise SystemExit(
+        "Missing Python dependency curl_cffi. Install it with: pip install curl_cffi"
+    )
 
 
 BASE_URL = "https://uiverse.io/elements"
 ROUTE_KEY = "routes/$category"
+MAX_LIMIT = 100
+# Guards against a response that keeps claiming another page while returning
+# nothing usable, which would otherwise page forever.
+MAX_PAGES = 20
 
 
 def main():
@@ -23,7 +32,7 @@ def main():
     if not query:
         raise SystemExit("Missing search query.")
 
-    limit = max(1, min(args.limit, 100))
+    limit = max(1, min(args.limit, MAX_LIMIT))
     results = []
     page = 0
     has_next_page = True
@@ -34,18 +43,26 @@ def main():
     if args.proxy:
         options["proxies"] = {"http": args.proxy, "https": args.proxy}
 
-    while has_next_page and len(results) < limit:
+    while has_next_page and len(results) < limit and page < MAX_PAGES:
         params = urlencode({"_data": ROUTE_KEY, "search": query, "page": page})
         response = cffi_requests.get(f"{BASE_URL}?{params}", **options)
         if response.status_code != 200:
             raise SystemExit(f"Uiverse search failed: {response.status_code}")
 
-        payload = response.json()
+        try:
+            payload = response.json()
+        except ValueError:
+            raise SystemExit("Uiverse search returned a non-JSON response")
+
         posts_count = payload.get("postsCount", 0)
         has_next_page = bool(payload.get("hasNextPage"))
         current_page = payload.get("currentPage", page)
 
-        for post in payload.get("posts") or []:
+        posts = payload.get("posts") or []
+        if not posts:
+            break
+
+        for post in posts:
             username = (post.get("user") or {}).get("username")
             slug = post.get("friendlyId")
             if not username or not slug:

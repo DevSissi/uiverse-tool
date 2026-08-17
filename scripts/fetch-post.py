@@ -3,12 +3,19 @@
 import argparse
 import json
 import sys
+from urllib.parse import urlparse
 
-from curl_cffi import requests as cffi_requests
+try:
+    from curl_cffi import requests as cffi_requests
+except ModuleNotFoundError:
+    raise SystemExit(
+        "Missing Python dependency curl_cffi. Install it with: pip install curl_cffi"
+    )
 
 
 BASE_URL = "https://uiverse.io"
 ROUTE_KEY = "routes/$username.$friendlyId"
+ALLOWED_HOSTS = ("uiverse.io", "www.uiverse.io")
 
 
 def trim_segment(value):
@@ -22,10 +29,8 @@ def parse_input(raw):
 
     pathname = value
     if value.startswith(("http://", "https://")):
-        from urllib.parse import urlparse
-
         parsed = urlparse(value)
-        if parsed.hostname not in ("uiverse.io", "www.uiverse.io"):
+        if parsed.hostname not in ALLOWED_HOSTS:
             raise SystemExit(f"Unsupported host: {parsed.hostname}")
         pathname = parsed.path
 
@@ -34,7 +39,7 @@ def parse_input(raw):
         raise SystemExit(f"Expected author/slug from input: {raw}")
 
     username, slug = segments
-    return f"{BASE_URL}/{username}/{slug}"
+    return username, slug
 
 
 def main():
@@ -43,7 +48,8 @@ def main():
     parser.add_argument("--proxy")
     args = parser.parse_args()
 
-    url = parse_input(args.input)
+    username, slug = parse_input(args.input)
+    url = f"{BASE_URL}/{username}/{slug}"
     data_url = f"{url}?_data={ROUTE_KEY}"
     options = {"impersonate": "chrome", "timeout": 30}
     if args.proxy:
@@ -53,14 +59,18 @@ def main():
     if response.status_code != 200:
         raise SystemExit(f"Uiverse request failed: {response.status_code}")
 
-    payload = response.json()
+    try:
+        payload = response.json()
+    except ValueError:
+        raise SystemExit(f"Uiverse returned a non-JSON response for {url}")
+
     post = payload.get("post") or {}
     if not post.get("id"):
         raise SystemExit(f"Could not resolve post data from {url}")
 
     result = {
-        "username": url.split("/")[-2],
-        "slug": url.split("/")[-1],
+        "username": username,
+        "slug": slug,
         "url": url,
         "postId": post["id"],
         "type": post.get("type"),
