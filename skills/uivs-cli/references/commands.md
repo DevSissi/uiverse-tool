@@ -25,7 +25,7 @@ npm install -g @cissibot/uivs
 | `uivs vue <input> [output]` | Vue SFC |
 | `uivs svelte <input> [output]` | Svelte component |
 | `uivs lit <input> [output]` | Lit component |
-| `uivs search <query> [--limit N]` | Search by tag, style, or creator |
+| `uivs search <query> [--limit N]` | Search by tag, style, or creator (`N` is an integer 1-100, default 10) |
 | `uivs info <input>` | Metadata, type, and tags |
 | `uivs tags <input>` | Tag list only |
 | `uivs --help` / `--version` | Help and version |
@@ -112,6 +112,12 @@ https://uiverse.io/elements?_data=routes/$category&search=<query>&page=<page>
 ```
 
 Python helpers use `curl_cffi` with Chrome impersonation and a 30-second timeout.
+
+## Python interpreter
+
+Precedence: `UIVERSE_PYTHON`, then `python3`, then `python`. Only a missing
+interpreter falls through to the next candidate; a helper script that runs and
+fails reports its own error.
 
 ## Proxy behavior
 

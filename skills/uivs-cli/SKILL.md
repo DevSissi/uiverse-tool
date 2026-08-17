@@ -65,7 +65,7 @@ npm run verify
 bash skills/uivs-cli/scripts/verify-project.sh
 ```
 
-The script checks Node and Python syntax, CLI help and version output, language target resolution, and the `parse5` HTML-to-JSX conversion.
+The script checks Node and Python syntax, CLI help and version output, language target resolution, the `parse5` HTML-to-JSX conversion (attributes, fragment roots for sibling markup, CSS custom properties, tagged-template escaping, component naming, empty-CSS output), argument rejection messages, and that a large payload survives a piped stdout intact.
 
 For live commands, require real parsed output: JSON with a `postId`, non-empty `code`, and a supported `language`. A `200` status alone is not proof of success.
 
@@ -75,6 +75,15 @@ For live commands, require real parsed output: JSON with a `postId`, non-empty `
 - `fetch helper returned invalid JSON` or `Could not resolve post data`: inspect `scripts/fetch-post.py`, the `_data` route, and the proxy.
 - `Unsupported host` or `Expected author/slug`: fix the input format, not the fetch layer.
 - `Unsupported language`: pass one of the supported targets or a `jsx`/`tsx` alias.
+- `Missing Python dependency curl_cffi`: run `pip install -r requirements.txt`.
+- `Python 3.10+ is required but was not found`: install Python, or set `UIVERSE_PYTHON` to the interpreter path.
+- `--limit must be an integer between 1 and 100`: pass an integer in range.
+
+## Invariants
+
+- Never print results with `process.exit` still pending: `bin/uivs.js` awaits the stdout drain so piped output cannot be truncated.
+- Source HTML/CSS embedded in tagged templates must pass through `escapeTemplate`, which neutralizes backticks and `${` while leaving CSS backslash escapes raw.
+- `type` from Uiverse is untrusted: derive JS identifiers with `componentName` and custom-element names with `customElementName`.
 
 ## Reference
 
