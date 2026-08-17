@@ -87,6 +87,12 @@ const vars = react({ type: 'loader', html: '<div style="--i: 1; -webkit-mask: no
 check('custom property preserved', vars.includes("'--i': '1'"));
 check('vendor property camelized', vars.includes("WebkitMask: 'none'"));
 
+// Declarations split on separators only, so a `;` inside url() or quotes
+// must not truncate the value.
+const inlineUrl = react({ type: 'icon', html: '<div style="background: url(data:image/svg+xml;base64,AAA); color: red"><b>a</b></div>' });
+check('semicolon inside url() kept', inlineUrl.includes("background: 'url(data:image/svg+xml;base64,AAA)'"));
+check('declaration after url() parsed', inlineUrl.includes("color: 'red'"));
+
 // Tagged-template safety: `${` must not become a live interpolation, while
 // CSS backslash escapes must reach the consumer unchanged.
 const templates = generateCode('react', {
