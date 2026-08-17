@@ -93,6 +93,11 @@ const inlineUrl = react({ type: 'icon', html: '<div style="background: url(data:
 check('semicolon inside url() kept', inlineUrl.includes("background: 'url(data:image/svg+xml;base64,AAA)'"));
 check('declaration after url() parsed', inlineUrl.includes("color: 'red'"));
 
+// Indentation must not alter values: JSX decodes the entities back.
+check('multi-line attribute preserved', react({ type: 'icon', html: '<svg><path d="M0 0\n  L1 1"/></svg>' }).includes('d="M0 0&#10;  L1 1"'));
+check('preformatted text preserved', react({ type: 'code', html: '<pre>a\nb</pre>' }).includes('<pre>a&#10;b</pre>'));
+check('normal text stays readable', !react({ type: 'note', html: '<div>a\nb</div>' }).includes('&#10;'));
+
 // Tagged-template safety: `${` must not become a live interpolation, while
 // CSS backslash escapes must reach the consumer unchanged.
 const templates = generateCode('react', {
