@@ -5,7 +5,7 @@
 Package: `@cissibot/uivs`
 
 ```bash
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 npm link
 # or
 npm install -g .

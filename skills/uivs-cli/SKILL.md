@@ -11,7 +11,10 @@ The repository ships the pure-HTTP npm CLI `@cissibot/uivs` with the `uivs` exec
 
 ## Quick start
 
-Prerequisites: Node.js 18+, Python 3.10+, and `pip install -r requirements.txt`.
+Prerequisites: Node.js 18+, Python 3.10+, and the `curl_cffi` dependency
+(`uv pip install -r requirements.txt`, or `pip install -r requirements.txt`).
+When the dependency lives in a virtualenv, point `UIVERSE_PYTHON` at that
+interpreter.
 
 Install or link the CLI once:
 
@@ -75,7 +78,7 @@ For live commands, require real parsed output: JSON with a `postId`, non-empty `
 - `fetch helper returned invalid JSON` or `Could not resolve post data`: inspect `scripts/fetch-post.py`, the `_data` route, and the proxy.
 - `Unsupported host` or `Expected author/slug`: fix the input format, not the fetch layer.
 - `Unsupported language`: pass one of the supported targets or a `jsx`/`tsx` alias.
-- `Missing Python dependency curl_cffi`: run `pip install -r requirements.txt`.
+- `Missing Python dependency curl_cffi`: run `uv pip install -r requirements.txt` or `pip install -r requirements.txt`, and set `UIVERSE_PYTHON` if it went into a virtualenv.
 - `Python 3.10+ is required but was not found`: install Python, or set `UIVERSE_PYTHON` to the interpreter path.
 - `--limit must be an integer between 1 and 100`: pass an integer in range.
 
