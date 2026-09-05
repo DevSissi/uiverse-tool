@@ -26,33 +26,36 @@
 
 ## 安装
 
-需要 Node.js 18+ 与 Python 3.10+。
-
-推荐用 [uv](https://docs.astral.sh/uv/) 安装 Python 依赖：
-
-```bash
-uv venv
-uv pip install curl_cffi
-export UIVERSE_PYTHON="$PWD/.venv/bin/python"
-```
-
-或用 `pip` 安装到 `uivs` 实际调用的解释器：
-
-```bash
-pip install curl_cffi
-```
-
-安装已发布的 npm 包为全局 CLI：
+需要 Node.js 18+，以及 [uv](https://docs.astral.sh/uv/) 或一个能 import `curl_cffi`
+的 Python 3.10+ 解释器，二者有其一即可。
 
 ```bash
 npm install -g @cissibot/uivs
 ```
 
+有 uv 时，安装到此为止。Python 辅助脚本以 PEP 723 内联声明自己的依赖，`uv run` 会在首次
+调用时装好 `curl_cffi`。uv 写入的一切都在它自己的目录里——`uv cache dir` 与 `uv python dir`，
+默认都是 XDG 路径——不会落进你的项目。
+
 或从仓库安装：
 
 ```bash
-uv pip install -r requirements.txt
 npm install -g .
+```
+
+### 没有 uv 时
+
+已装好 `curl_cffi` 的解释器会被直接使用，根本不会走到 uv：
+
+```bash
+pip install curl_cffi
+```
+
+要用的解释器不是 `PATH` 上的 `python3` 时（例如在某个 virtualenv 里），用
+`UIVERSE_PYTHON` 指定，它的优先级高于其他所有运行器：
+
+```bash
+export UIVERSE_PYTHON=/path/to/python
 ```
 
 ## 用法
@@ -151,7 +154,7 @@ HTTPS_PROXY
 HTTP_PROXY
 ```
 
-`uivs` 优先调用 `python3`，找不到时回退到 `python`。可设置 `UIVERSE_PYTHON` 指定解释器。
+`uivs` 依次尝试 `python3`、`python`、`uv run` 来运行 Python 辅助脚本。可设置 `UIVERSE_PYTHON` 指定解释器。
 
 ## Agent 技能
 

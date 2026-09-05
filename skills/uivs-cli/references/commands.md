@@ -5,13 +5,16 @@
 Package: `@cissibot/uivs`
 
 ```bash
-uv pip install -r requirements.txt
 npm link
 # or
 npm install -g .
 # or
 npm install -g @cissibot/uivs
 ```
+
+Requires Node.js 18+, plus either a Python 3.10+ interpreter with `curl_cffi` or
+uv. The Python helpers carry a PEP 723 header, so when no interpreter has the
+dependency `uv run` provisions it and there is no separate install step.
 
 `npm link` exposes the `uivs` command. When the command is not linked, use `node bin/uivs.js`.
 
@@ -113,11 +116,28 @@ https://uiverse.io/elements?_data=routes/$category&search=<query>&page=<page>
 
 Python helpers use `curl_cffi` with Chrome impersonation and a 30-second timeout.
 
-## Python interpreter
+## Python runner
 
-Precedence: `UIVERSE_PYTHON`, then `python3`, then `python`. Only a missing
-interpreter falls through to the next candidate; a helper script that runs and
-fails reports its own error.
+Precedence: `UIVERSE_PYTHON`, then `python3`, then `python`, then
+`uv run --no-config --no-project`. The bare interpreters come first so a machine
+that already has `curl_cffi` never pays for dependency resolution or touches the
+network.
+
+Two failures fall through to the next candidate: a command that is not
+installed, and an interpreter that cannot import `curl_cffi` while uv is still
+untried. Anything else is a helper that ran and failed, and reports its own
+error instead of being masked by a later candidate.
+
+The helpers signal a missing `curl_cffi` with exit code 3 and use 1 for every
+other failure; `MISSING_DEPENDENCY_EXIT` in `scripts/*.py` and `lib/fetch.js`
+must stay in step. When no candidate can supply the dependency, that error is
+reported rather than the generic `No Python runner was found`.
+
+`uv run` reads the PEP 723 header in `scripts/*.py` and supplies `curl_cffi`
+itself. `--no-config` keeps a `uv.toml` in the working directory from
+redirecting the package index — `uivs` is a global CLI and runs wherever it is
+invoked — and `--no-project` keeps a neighbouring `pyproject.toml` out of the
+resolution.
 
 ## Proxy behavior
 

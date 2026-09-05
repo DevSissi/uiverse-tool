@@ -1,1 +1,5 @@
+# For installing the dependency into an interpreter directly, which is the path
+# uivs prefers when it is available. The authoritative declaration is the PEP 723
+# header in scripts/fetch-post.py and scripts/search-posts.py, used by `uv run`
+# when no interpreter has the dependency; keep this pin in step with it.
 curl_cffi>=0.7.0

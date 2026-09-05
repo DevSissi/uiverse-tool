@@ -26,33 +26,38 @@ It fetches component HTML/CSS and converts it into React, Vue, Svelte, or Lit co
 
 ## Install
 
-Requires Node.js 18+ and Python 3.10+.
-
-Install the Python dependency with [uv](https://docs.astral.sh/uv/):
-
-```bash
-uv venv
-uv pip install curl_cffi
-export UIVERSE_PYTHON="$PWD/.venv/bin/python"
-```
-
-Or with `pip` into whichever interpreter `uivs` will use:
-
-```bash
-pip install curl_cffi
-```
-
-Install the published package as a global CLI:
+Requires Node.js 18+, plus either [uv](https://docs.astral.sh/uv/) or a Python
+3.10+ interpreter that can import `curl_cffi`.
 
 ```bash
 npm install -g @cissibot/uivs
 ```
 
+With uv, that is the whole install. The Python helpers declare their dependency
+inline (PEP 723), so `uv run` provisions `curl_cffi` on first use. Everything uv
+writes goes to its own directories — `uv cache dir` and `uv python dir`, both
+XDG paths by default — never into your project.
+
 Or install from the repository:
 
 ```bash
-uv pip install -r requirements.txt
 npm install -g .
+```
+
+### Without uv
+
+An interpreter that already has `curl_cffi` is used directly, and uv is never
+reached:
+
+```bash
+pip install curl_cffi
+```
+
+Set `UIVERSE_PYTHON` when the interpreter to use is not the `python3` on your
+`PATH` — a virtualenv, say. It outranks every other runner:
+
+```bash
+export UIVERSE_PYTHON=/path/to/python
 ```
 
 ## Usage
@@ -151,7 +156,7 @@ HTTPS_PROXY
 HTTP_PROXY
 ```
 
-`uivs` calls Python through `python3`, falling back to `python`. Set `UIVERSE_PYTHON` to point at a specific interpreter.
+`uivs` runs the Python helpers through `python3`, then `python`, then `uv run`. Set `UIVERSE_PYTHON` to point at a specific interpreter.
 
 ## Agent Skill
 

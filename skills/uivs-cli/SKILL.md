@@ -11,10 +11,11 @@ The repository ships the pure-HTTP npm CLI `@cissibot/uivs` with the `uivs` exec
 
 ## Quick start
 
-Prerequisites: Node.js 18+, Python 3.10+, and the `curl_cffi` dependency
-(`uv pip install -r requirements.txt`, or `pip install -r requirements.txt`).
-When the dependency lives in a virtualenv, point `UIVERSE_PYTHON` at that
-interpreter.
+Prerequisites: Node.js 18+, plus either a Python 3.10+ interpreter that can
+import `curl_cffi` (`pip install -r requirements.txt`) or uv. An interpreter
+that has the dependency is used directly; otherwise the PEP 723 header in the
+helpers lets `uv run` provision it, with no separate install step. Point
+`UIVERSE_PYTHON` at the interpreter when it is not the `python3` on `PATH`.
 
 Install or link the CLI once:
 
@@ -78,8 +79,8 @@ For live commands, require real parsed output: JSON with a `postId`, non-empty `
 - `fetch helper returned invalid JSON` or `Could not resolve post data`: inspect `scripts/fetch-post.py`, the `_data` route, and the proxy.
 - `Unsupported host` or `Expected author/slug`: fix the input format, not the fetch layer.
 - `Unsupported language`: pass one of the supported targets or a `jsx`/`tsx` alias.
-- `Missing Python dependency curl_cffi`: run `uv pip install -r requirements.txt` or `pip install -r requirements.txt`, and set `UIVERSE_PYTHON` if it went into a virtualenv.
-- `Python 3.10+ is required but was not found`: install Python, or set `UIVERSE_PYTHON` to the interpreter path.
+- `Missing Python dependency curl_cffi`: no runner could supply it. Run `pip install -r requirements.txt` and set `UIVERSE_PYTHON` if it went into a virtualenv, or install uv so `uv run` provisions it.
+- `No Python runner was found`: install uv, or set `UIVERSE_PYTHON` to a Python 3.10+ interpreter that has `curl_cffi`.
 - `--limit must be an integer between 1 and 100`: pass an integer in range.
 
 ## Invariants
