@@ -159,11 +159,16 @@ expect_error 'Missing value for --limit' search x --limit
 echo "piped stdout stays intact"
 # console.log on a pipe is asynchronous: exiting mid-write silently truncates
 # large payloads, so assert the JSON survives a pipe end to end.
+REAL_PYTHON="$(command -v python3)"
 STUB_DIR="$(mktemp -d)"
-trap 'rm -rf "$STUB_DIR"' EXIT
+FALLBACK_DIR="$(mktemp -d)"
+trap 'rm -rf "$STUB_DIR" "$FALLBACK_DIR"' EXIT
+# The stubs are reached through PATH, so an interpreter configured for real work
+# must not outrank them.
+unset UIVERSE_PYTHON
 cat > "$STUB_DIR/python3" <<STUB
 #!/usr/bin/env bash
-exec "$(command -v python3)" -c '
+exec "$REAL_PYTHON" -c '
 import json
 print(json.dumps({"username": "a", "slug": "b", "url": "https://uiverse.io/a/b",
                   "postId": "pid", "type": "button", "isTailwind": False,
@@ -171,7 +176,14 @@ print(json.dumps({"username": "a", "slug": "b", "url": "https://uiverse.io/a/b",
                   "css": ".btn-%d { color: red; }\n" * 20000}))
 '
 STUB
-chmod +x "$STUB_DIR/python3"
+# A bare interpreter outranks uv, so a machine that already has curl_cffi never
+# pays for dependency resolution. This stub fails loudly if that order regresses.
+cat > "$STUB_DIR/uv" <<'STUB'
+#!/usr/bin/env bash
+echo "uv was tried ahead of a working python3" >&2
+exit 1
+STUB
+chmod +x "$STUB_DIR/python3" "$STUB_DIR/uv"
 PATH="$STUB_DIR:$PATH" node bin/uivs.js react a/b > "$STUB_DIR/out.json"
 PATH="$STUB_DIR:$PATH" node bin/uivs.js react a/b | cat > "$STUB_DIR/piped.json"
 
@@ -197,5 +209,55 @@ if (parsed.code.length !== parsed.length || parsed.code.length < 200000) {
   process.exit(1);
 }
 " "$STUB_DIR/out.json" "$STUB_DIR/piped.json"
+
+echo "missing curl_cffi hands off to uv"
+# The one helper failure that must not be final: an interpreter without
+# curl_cffi has to fall through to `uv run`, which provisions it from the PEP
+# 723 header. The uv stub also pins the prefix arguments -- --no-config above
+# all, without which a uv.toml in the working directory could redirect the
+# package index.
+for name in python3 python; do
+    cat > "$FALLBACK_DIR/$name" <<'STUB'
+#!/usr/bin/env bash
+echo "Missing Python dependency curl_cffi." >&2
+exit 3
+STUB
+done
+cat > "$FALLBACK_DIR/uv" <<STUB
+#!/usr/bin/env bash
+if [[ "\$1 \$2 \$3" != "run --no-config --no-project" ]]; then
+    echo "unexpected uv prefix: \$1 \$2 \$3" >&2
+    exit 1
+fi
+exec "$REAL_PYTHON" -c '
+import json
+print(json.dumps({"username": "a", "slug": "b", "url": "https://uiverse.io/a/b",
+                  "postId": "pid", "type": "button", "isTailwind": True,
+                  "tags": [], "html": "<button>Go</button>", "css": ""}))
+'
+STUB
+chmod +x "$FALLBACK_DIR/python3" "$FALLBACK_DIR/python" "$FALLBACK_DIR/uv"
+PATH="$FALLBACK_DIR:$PATH" node bin/uivs.js react a/b > "$FALLBACK_DIR/out.json"
+node -e "
+const fs = require('node:fs');
+const parsed = JSON.parse(fs.readFileSync(process.argv[1], 'utf8'));
+if (parsed.postId !== 'pid' || !parsed.code.includes('Go')) {
+  console.error('the uv fallback did not produce the post');
+  process.exit(1);
+}
+" "$FALLBACK_DIR/out.json"
+
+# When the last candidate lacks curl_cffi too, nothing is left to provision it,
+# so the dependency error is the answer -- not a generic "no runner was found".
+cat > "$FALLBACK_DIR/uv" <<'STUB'
+#!/usr/bin/env bash
+echo "Missing Python dependency curl_cffi." >&2
+exit 3
+STUB
+chmod +x "$FALLBACK_DIR/uv"
+(
+    PATH="$FALLBACK_DIR:$PATH"
+    expect_error 'Missing Python dependency curl_cffi' react a/b
+)
 
 echo "ok"

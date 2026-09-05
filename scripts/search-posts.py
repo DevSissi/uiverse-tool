@@ -1,16 +1,28 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.10"
+# dependencies = ["curl_cffi>=0.7.0"]
+# ///
 
 import argparse
 import json
 import sys
 from urllib.parse import urlencode
 
+# Reserved for "this interpreter cannot import curl_cffi", which is the one
+# failure lib/fetch.js retries on a runner able to provision it. Every other
+# failure exits 1. Keep both in step.
+MISSING_DEPENDENCY_EXIT = 3
+
 try:
     from curl_cffi import requests as cffi_requests
 except ModuleNotFoundError:
-    raise SystemExit(
-        "Missing Python dependency curl_cffi. Install it with: pip install curl_cffi"
+    print(
+        "Missing Python dependency curl_cffi. Run this script through `uv run` to have it\n"
+        "provisioned automatically, or install it with: pip install curl_cffi",
+        file=sys.stderr,
     )
+    raise SystemExit(MISSING_DEPENDENCY_EXIT)
 
 
 BASE_URL = "https://uiverse.io/elements"
